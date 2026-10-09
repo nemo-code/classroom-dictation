@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f4f1e8" />
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Literata:opsz,wght@7..72,600;7..72,750&display=swap" rel="stylesheet">
+  <title>课堂听写</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper:#f4f1e8;
+      --paper-2:#fffdf7;
+      --ink:#17221e;
+      --muted:#5a655f;
+      --line:#c9cec5;
+      --grid:rgba(23,34,30,.055);
+      --accent:#b83828;
+      --accent-ink:#fffaf3;
+      --blue:#225f73;
+      --blue-soft:#dcebf0;
+      --gold:#e7b949;
+      --good:#1e7656;
+      --bad:#b43b2f;
+      --shadow:0 16px 44px rgba(35,38,31,.10);
+      --radius:18px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper:#171b19;
+        --paper-2:#202622;
+        --ink:#f2f0e8;
+        --muted:#b9c0b9;
+        --line:#465049;
+        --grid:rgba(255,255,255,.035);
+        --accent:#e26552;
+        --accent-ink:#1b100e;
+        --blue:#65abc0;
+        --blue-soft:#203b43;
+        --gold:#d6a83c;
+        --good:#63bd92;
+        --bad:#ef7a6b;
+        --shadow:0 18px 50px rgba(0,0,0,.28);
+      }
+    }
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--paper)}
+    body{
+      margin:0; min-height:100vh; color:var(--ink); font-family:"IBM Plex Sans","PingFang SC","Microsoft YaHei",sans-serif;
+      background:
+        linear-gradient(var(--grid) 1px,transparent 1px),
+        linear-gradient(90deg,var(--grid) 1px,transparent 1px),
+        var(--paper);
+      background-size:32px 32px;
+    }
+    button,input,textarea{font:inherit}
+    button{color:inherit}
+    .page{width:min(1100px,100%);margin:0 auto;padding:clamp(22px,4vw,54px) clamp(16px,4vw,42px) 64px}
+    .topline{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:28px}
+    .headline{margin:0;font-family:"Literata","Songti SC",serif;font-size:clamp(34px,6vw,66px);line-height:.98;letter-spacing:-.04em;max-width:680px}
+    .subline{margin:12px 0 0;color:var(--muted);font-size:16px;line-height:1.7;max-width:620px}
+    .step-mark{flex:0 0 auto;display:grid;place-items:center;width:72px;height:72px;border:1px solid var(--ink);border-radius:50%;font-family:"Literata",serif;font-size:28px;background:var(--gold);color:#251b07;box-shadow:6px 6px 0 var(--ink)}
+    .shell{background:var(--paper-2);border:1px solid var(--ink);box-shadow:var(--shadow);overflow:hidden}
+    .modebar{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--ink)}
+    .mode-btn{appearance:none;border:0;background:transparent;padding:16px 20px;cursor:pointer;font-weight:700;font-size:16px;letter-spacing:.02em}
+    .mode-btn+ .mode-btn{border-left:1px solid var(--ink)}
+    .mode-btn[aria-selected="true"]{background:var(--ink);color:var(--paper-2)}
+    .panel{padding:clamp(20px,4vw,42px)}
+    .panel[hidden]{display:none}
+    .grid-two{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:34px}
+    h2{font-family:"Literata","Songti SC",serif;margin:0 0 8px;font-size:clamp(25px,3vw,34px);letter-spacing:-.02em}
+    .lead{margin:0 0 24px;color:var(--muted);line-height:1.65}
+    .field{display:block;margin-bottom:20px}
+    .labelrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+    .label{font-weight:700;font-size:14px}
+    .hint{font-size:12px;color:var(--muted)}
+    input,textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:13px 14px;outline:none;transition:border-color .15s,box-shadow .15s}
+    input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 18%,transparent)}
+    textarea{min-height:260px;resize:vertical;line-height:1.85}
+    .rules{border-top:1px solid var(--line);margin-top:26px;padding-top:24px}
+    .rules-title{font-weight:700;margin:0 0 14px}
+    .rule{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:14px 0;border-bottom:1px dashed var(--line)}
+    .rule:first-of-type{border-top:1px dashed var(--line)}
+    .rule strong{display:block;font-size:14px}
+    .rule small{display:block;color:var(--muted);margin-top:3px;line-height:1.4}
+    .seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+    .seg button{border:0;background:transparent;border-radius:999px;padding:7px 11px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap}
+    .seg button.active{background:var(--blue);color:#fff}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+    .primary,.secondary,.text-btn{border:1px solid var(--ink);padding:12px 18px;cursor:pointer;font-weight:700;border-radius:8px;min-height:46px}
+    .primary{background:var(--accent);color:var(--accent-ink);box-shadow:4px 4px 0 var(--ink)}
+    .primary:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+    .secondary{background:var(--paper-2)}
+    .text-btn{background:transparent;border-color:var(--line)}
+    .aside{border-left:1px solid var(--line);padding-left:28px}
+    .numbered{list-style:none;padding:0;margin:18px 0 0;counter-reset:steps}
+    .numbered li{counter-increment:steps;display:grid;grid-template-columns:32px 1fr;gap:12px;padding:0 0 20px;line-height:1.55;color:var(--muted)}
+    .numbered li::before{content:counter(steps);display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--ink);border-radius:50%;color:var(--ink);font-weight:700;background:var(--gold)}
+    .notice{margin-top:24px;background:var(--blue-soft);border:1px solid var(--blue);padding:14px 16px;font-size:13px;line-height:1.55}
+    .join-card{max-width:650px}
+    .join-card .field{max-width:560px}
+    .code-input{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.02em;min-height:120px}
+    .session-card{border:1px solid var(--ink);background:var(--paper);margin-top:28px;padding:22px;position:relative}
+    .session-card::before{content:"READY";position:absolute;right:16px;top:16px;color:var(--good);border:1px solid currentColor;padding:4px 7px;font:700 10px "IBM Plex Sans";letter-spacing:.12em;transform:rotate(3deg)}
+    .session-card[hidden]{display:none}
+    .codebox{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;background:var(--ink);color:var(--paper-2);padding:16px;margin:14px 0;max-height:130px;overflow:auto;font-size:12px;line-height:1.55;user-select:all}
+    .quiz-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding-bottom:18px;border-bottom:1px solid var(--ink)}
+    .quiz-meta{color:var(--muted);font-size:14px;margin-top:4px}
+    .progress{font-family:"Literata",serif;font-size:26px;font-weight:750;white-space:nowrap}
+    .answers{display:grid;gap:14px;margin-top:24px}
+    .answer-row{display:grid;grid-template-columns:42px 1fr;gap:12px;align-items:center}
+    .answer-num{font-family:"Literata",serif;font-size:21px;text-align:center;color:var(--muted)}
+    .answer-row input{font-size:17px;padding:14px 16px}
+    .quiz-actions{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+    .answered-note{font-size:13px;color:var(--muted)}
+    .result-hero{display:grid;grid-template-columns:190px 1fr;gap:28px;align-items:center;border-bottom:1px solid var(--ink);padding-bottom:28px;margin-bottom:28px}
+    .score-ring{width:178px;height:178px;border-radius:50%;display:grid;place-items:center;background:var(--gold);border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink);color:#241b08}
+    .score-num{font-family:"Literata",serif;font-size:55px;line-height:.85;font-weight:750;letter-spacing:-.06em}
+    .score-den{font-size:14px;text-align:center;margin-top:8px;font-weight:700}
+    .result-name{font-size:15px;color:var(--muted);margin-bottom:8px}
+    .result-title{font-family:"Literata",serif;font-size:clamp(30px,4vw,48px);line-height:1.1;margin:0}
+    .result-summary{margin:12px 0 0;color:var(--muted);font-size:16px}
+    .review-list{display:grid;gap:10px}
+    .review-item{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:start;padding:15px 0;border-bottom:1px solid var(--line)}
+    .status-dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;margin-top:2px}
+    .status-dot.good{background:var(--good)}
+    .status-dot.bad{background:var(--bad)}
+    .review-main{min-width:0}
+    .given{font-size:17px;font-weight:600;overflow-wrap:anywhere}
+    .correct{font-size:13px;color:var(--bad);margin-top:4px;overflow-wrap:anywhere}
+    .tag{border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:11px;color:var(--muted);white-space:nowrap}
+    .empty{text-align:center;padding:38px 20px;color:var(--muted)}
+    .error{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(8,12,10,.68);display:grid;place-items:center;padding:20px;z-index:20}
+    .modal-backdrop[hidden]{display:none}
+    .modal{width:min(430px,100%);background:var(--paper-2);border:1px solid var(--ink);box-shadow:10px 10px 0 var(--gold);padding:26px}
+    .modal h3{font-family:"Literata",serif;font-size:27px;margin:0 0 8px}
+    .modal p{color:var(--muted);line-height:1.6;margin:0}
+    .toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--paper-2);padding:11px 18px;border-radius:999px;font-size:13px;z-index:30;box-shadow:var(--shadow)}
+    .toast[hidden]{display:none}
+    .teacher-banner{margin-top:24px;padding:14px 18px;border:1px solid var(--good);background:color-mix(in srgb,var(--good) 12%,var(--paper-2));display:flex;justify-content:space-between;gap:20px;align-items:center}
+    .teacher-banner strong{font-family:"Literata",serif;font-size:20px}
+    .fullscreen-score{position:fixed;inset:0;background:var(--paper);z-index:40;display:grid;place-items:center;padding:24px;text-align:center}
+    .fullscreen-score[hidden]{display:none}
+    .fullscreen-score .score-num{font-size:clamp(100px,28vw,260px)}
+    .fullscreen-score .student-big{font-family:"Literata",serif;font-size:clamp(32px,7vw,70px);margin:24px 0 8px}
+    .fullscreen-score .close-full{position:absolute;top:20px;right:20px}
+    @media (max-width:760px){
+      .topline{align-items:center}.step-mark{width:54px;height:54px;font-size:21px;box-shadow:4px 4px 0 var(--ink)}
+      .grid-two{grid-template-columns:1fr}.aside{border-left:0;border-top:1px solid var(--line);padding:24px 0 0}
+      .panel{padding:20px}.rule{grid-template-columns:1fr}.seg{justify-self:start}
+      .result-hero{grid-template-columns:1fr;text-align:center}.score-ring{margin:0 auto;width:150px;height:150px}
+      .quiz-actions{align-items:stretch;flex-direction:column}.quiz-actions .primary{width:100%}
+      .review-item{grid-template-columns:32px 1fr}.review-item .tag{grid-column:2;justify-self:start}
+      .teacher-banner{align-items:flex-start;flex-direction:column}
+    }
+    @media (max-width:420px){
+      .page{padding-left:12px;padding-right:12px}.headline{font-size:36px}.subline{font-size:14px}.step-mark{display:none}
+      .mode-btn{padding:14px 10px;font-size:14px}.answer-row{grid-template-columns:32px 1fr;gap:6px}.answer-num{font-size:17px}
+      .btnrow>*{flex:1}.secondary,.primary,.text-btn{padding-left:12px;padding-right:12px}
+    }
+    @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+    @media print{body{background:#fff}.modebar,.btnrow,.quiz-actions,.notice,.close-full{display:none!important}.shell{box-shadow:none}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topline">
+      <div>
+        <h1 class="headline" id="pageHeadline">开始一场听写</h1>
+        <p class="subline" id="pageSubline">老师生成课堂码，学生打开同一个页面输入课堂码作答；交卷后立即显示成绩。</p>
+      </div>
+      <div class="step-mark" id="stepMark" aria-hidden="true">01</div>
+    </div>
+
+    <section class="shell" aria-label="听写工具">
+      <div class="modebar" role="tablist" aria-label="选择身份">
+        <button class="mode-btn" id="teacherTab" role="tab" aria-selected="true" aria-controls="teacherPanel">我是老师</button>
+        <button class="mode-btn" id="studentTab" role="tab" aria-selected="false" aria-controls="studentPanel">我是学生</button>
+      </div>
+
+      <section class="panel" id="teacherPanel" role="tabpanel" aria-labelledby="teacherTab">
+        <div class="grid-two">
+          <div>
+            <h2>设置本次内容</h2>
+            <p class="lead">标准答案一行一题。课堂上照顺序念，页面不会向学生展示答案。</p>
+            <label class="field">
+              <span class="labelrow"><span class="label">听写名称</span><span class="hint">选填</span></span>
+              <input id="dictationTitle" maxlength="60" placeholder="例如：Unit 3 Vocabulary" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span class="labelrow"><span class="label">标准答案</span><span class="hint" id="itemCount">0 题</span></span>
+              <textarea id="answerKey" spellcheck="false" placeholder="environment&#10;take responsibility for&#10;Could you repeat that, please?"></textarea>
+            </label>
+
+            <div class="rules">
+              <p class="rules-title">判分规则</p>
+              <div class="rule">
+                <div><strong>英文字母大小写</strong><small>是否区分 Apple 和 apple</small></div>
+                <div class="seg" data-rule="case">
+                  <button type="button" class="active" data-value="ignore">忽略</button><button type="button" data-value="strict">严格</button>
+                </div>
+              </div>
+              <div class="rule">
+                <div><strong>标点符号</strong><small>是否要求逗号、句号等完全一致</small></div>
+                <div class="seg" data-rule="punctuation">
+                  <button type="button" class="active" data-value="ignore">忽略</button><button type="button" data-value="strict">严格</button>
+                </div>
+              </div>
+              <div class="rule">
+                <div><strong>拼写错误</strong><small>宽松模式仅允许长度 ≥ 5 的答案有 1 处差异</small></div>
+                <div class="seg" data-rule="spelling">
+                  <button type="button" class="active" data-value="strict">严格</button><button type="button" data-value="lenient">宽松</button>
+                </div>
+              </div>
+            </div>
+            <p class="error" id="teacherError" aria-live="polite"></p>
+            <div class="btnrow">
+              <button class="primary" id="createCode">生成课堂码</button>
+              <button class="secondary" id="clearTeacher">清空</button>
+            </div>
+
+            <div class="session-card" id="sessionCard" hidden>
+              <strong>课堂码已生成</strong>
+              <p class="lead" style="margin:6px 0 0">让学生先打开这个页面，再把下面的课堂码发给他们。</p>
+              <div class="codebox" id="classCode" tabindex="0" aria-label="课堂码"></div>
+              <div class="btnrow" style="margin-top:12px">
+                <button class="primary" id="copyCode">复制课堂码</button>
+                <button class="secondary" id="tryAsStudent">在本机试答</button>
+              </div>
+            </div>
+          </div>
+          <aside class="aside">
+            <h2>课堂怎么用</h2>
+            <ol class="numbered">
+              <li>老师填入标准答案，设好判分规则，生成课堂码。</li>
+              <li>学生打开本页，选择“我是学生”，粘贴课堂码并填写姓名或学号。</li>
+              <li>老师按题号口头听写，学生依次输入答案。</li>
+              <li>学生交卷后把大字成绩页展示给老师。</li>
+            </ol>
+            <div class="notice"><strong>适用范围：</strong>课堂码中包含用于本机批改的答案，适合课堂练习与当场查看，不建议用于需要防作弊的正式考试。</div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="studentPanel" role="tabpanel" aria-labelledby="studentTab" hidden>
+        <div class="join-card">
+          <h2>加入本次听写</h2>
+          <p class="lead">粘贴老师发来的课堂码，填好姓名或学号即可开始。</p>
+          <label class="field">
+            <span class="labelrow"><span class="label">课堂码</span><span class="hint">长按可粘贴</span></span>
+            <textarea class="code-input" id="joinCode" placeholder="在这里粘贴课堂码…" spellcheck="false"></textarea>
+          </label>
+          <label class="field">
+            <span class="labelrow"><span class="label">姓名或学号</span><span class="hint">成绩页会显示</span></span>
+            <input id="studentName" maxlength="40" placeholder="请输入" autocomplete="name" />
+          </label>
+          <p class="error" id="joinError" aria-live="polite"></p>
+          <div class="btnrow"><button class="primary" id="startQuiz">开始作答</button></div>
+        </div>
+      </section>
+
+      <section class="panel" id="quizPanel" hidden>
+        <div class="quiz-head">
+          <div><h2 id="quizTitle">课堂听写</h2><div class="quiz-meta" id="quizMeta"></div></div>
+          <div class="progress" id="progress">0 / 0</div>
+        </div>
+        <div class="answers" id="answerFields"></div>
+        <div class="quiz-actions">
+          <span class="answered-note" id="answeredNote">尚未作答</span>
+          <button class="primary" id="submitQuiz">交卷并批改</button>
+        </div>
+      </section>
+
+      <section class="panel" id="resultPanel" hidden>
+        <div class="result-hero">
+          <div class="score-ring"><div><div class="score-num" id="scoreNum">0</div><div class="score-den">分</div></div></div>
+          <div><div class="result-name" id="resultName"></div><h2 class="result-title" id="resultTitle">已完成</h2><p class="result-summary" id="resultSummary"></p></div>
+        </div>
+        <div class="review-list" id="reviewList"></div>
+        <div class="teacher-banner">
+          <div><strong>准备给老师看？</strong><div class="quiz-meta">打开大字模式，姓名和分数会占满屏幕。</div></div>
+          <button class="primary" id="showTeacher">大字展示成绩</button>
+        </div>
+        <div class="btnrow"><button class="secondary" id="backToJoin">返回加入页</button></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="confirmModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h3 id="confirmTitle">确定交卷吗？</h3>
+      <p id="confirmText">交卷后会立即批改。</p>
+      <div class="btnrow"><button class="secondary" id="cancelSubmit">继续检查</button><button class="primary" id="confirmSubmit">确定交卷</button></div>
+    </div>
+  </div>
+
+  <div class="fullscreen-score" id="fullscreenScore" hidden>
+    <button class="secondary close-full" id="closeFull">关闭</button>
+    <div><div class="score-num" id="bigScore">0</div><div class="student-big" id="bigName"></div><div class="result-summary" id="bigSummary"></div></div>
+  </div>
+  <div class="toast" id="toast" hidden role="status"></div>
+
+  <script>
+    (function(){
+      'use strict';
+      var state={mode:'teacher',rules:{case:'ignore',punctuation:'ignore',spelling:'strict'},quiz:null,student:'',responses:[],lastResult:null};
+      var $=function(id){return document.getElementById(id)};
+      var teacherTab=$('teacherTab'),studentTab=$('studentTab'),teacherPanel=$('teacherPanel'),studentPanel=$('studentPanel');
+      var quizPanel=$('quizPanel'),resultPanel=$('resultPanel');
+
+      function setMode(mode){
+        state.mode=mode;
+        teacherTab.setAttribute('aria-selected',String(mode==='teacher'));
+        studentTab.setAttribute('aria-selected',String(mode==='student'));
+        teacherPanel.hidden=mode!=='teacher';studentPanel.hidden=mode!=='student';quizPanel.hidden=true;resultPanel.hidden=true;
+        $('pageHeadline').textContent=mode==='teacher'?'开始一场听写':'准备好就开始';
+        $('pageSubline').textContent=mode==='teacher'?'老师生成课堂码，学生打开同一个页面输入课堂码作答；交卷后立即显示成绩。':'输入课堂码后，按老师口头听写的顺序逐题作答。';
+        $('stepMark').textContent=mode==='teacher'?'01':'02';
+        window.scrollTo({top:0,behavior:'smooth'});
+      }
+      teacherTab.addEventListener('click',function(){setMode('teacher')});
+      studentTab.addEventListener('click',function(){setMode('student')});
+
+      document.querySelectorAll('.seg button').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var seg=btn.closest('.seg');seg.querySelectorAll('button').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');state.rules[seg.dataset.rule]=btn.dataset.value;
+        });
+      });
+
+      function getAnswers(){return $('answerKey').value.split(/\r?\n/).map(function(s){return s.trim()}).filter(Boolean)}
+      $('answerKey').addEventListener('input',function(){var n=getAnswers().length;$('itemCount').textContent=n+' 题'});
+
+      function bytesToBase64(bytes){var out='';for(var i=0;i<bytes.length;i++)out+=String.fromCharCode(bytes[i]);return btoa(out).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+      function base64ToBytes(text){var s=text.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var bin=atob(s),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes}
+      function encodeQuiz(payload){return 'DICT1.'+bytesToBase64(new TextEncoder().encode(JSON.stringify(payload)))}
+      function decodeQuiz(code){
+        var clean=code.trim().replace(/\s/g,'');if(clean.indexOf('DICT1.')!==0)throw new Error('格式不正确');
+        var obj=JSON.parse(new TextDecoder().decode(base64ToBytes(clean.slice(6))));
+        if(!obj||obj.v!==1||!Array.isArray(obj.a)||!obj.a.length)throw new Error('内容不完整');
+        if(obj.a.length>100)throw new Error('题目数量过多');
+        return obj;
+      }
+      $('createCode').addEventListener('click',function(){
+        var answers=getAnswers();$('teacherError').textContent='';
+        if(!answers.length){$('teacherError').textContent='请先输入至少一条标准答案。';$('answerKey').focus();return}
+        if(answers.length>100){$('teacherError').textContent='一次最多 100 题。';return}
+        var payload={v:1,t:$('dictationTitle').value.trim(),a:answers,c:state.rules.case,p:state.rules.punctuation,s:state.rules.spelling};
+        $('classCode').textContent=encodeQuiz(payload);$('sessionCard').hidden=false;$('sessionCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+      });
+      $('clearTeacher').addEventListener('click',function(){$('dictationTitle').value='';$('answerKey').value='';$('itemCount').textContent='0 题';$('teacherError').textContent='';$('sessionCard').hidden=true});
+      $('copyCode').addEventListener('click',function(){copyText($('classCode').textContent,'课堂码已复制')});
+      $('tryAsStudent').addEventListener('click',function(){$('joinCode').value=$('classCode').textContent;setMode('student');$('studentName').focus()});
+
+      function copyText(text,message){
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){showToast(message)}).catch(function(){fallbackCopy(text,message)})}
+        else fallbackCopy(text,message);
+      }
+      function fallbackCopy(text,message){var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast(message)}catch(e){showToast('请长按课堂码手动复制')}document.body.removeChild(ta)}
+      var toastTimer;
+      function showToast(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(function(){$('toast').hidden=true},2200)}
+
+      $('startQuiz').addEventListener('click',function(){
+        $('joinError').textContent='';var name=$('studentName').value.trim();
+        if(!$('joinCode').value.trim()){$('joinError').textContent='请粘贴老师发来的课堂码。';$('joinCode').focus();return}
+        if(!name){$('joinError').textContent='请填写姓名或学号。';$('studentName').focus();return}
+        try{state.quiz=decodeQuiz($('joinCode').value);state.student=name;state.responses=new Array(state.quiz.a.length).fill('');renderQuiz()}
+        catch(e){$('joinError').textContent='课堂码无法识别，请向老师重新复制完整代码。'}
+      });
+      function renderQuiz(){
+        teacherPanel.hidden=true;studentPanel.hidden=true;resultPanel.hidden=true;quizPanel.hidden=false;
+        $('pageHeadline').textContent='按顺序作答';$('pageSubline').textContent='听清老师读出的内容后，再填写对应题号。';$('stepMark').textContent='03';
+        $('quizTitle').textContent=state.quiz.t||'本次课堂听写';$('quizMeta').textContent=state.student+' · 共 '+state.quiz.a.length+' 题';
+        var wrap=$('answerFields');wrap.innerHTML='';
+        state.quiz.a.forEach(function(_,i){
+          var row=document.createElement('label');row.className='answer-row';
+          var num=document.createElement('span');num.className='answer-num';num.textContent=String(i+1).padStart(2,'0');
+          var input=document.createElement('input');input.type='text';input.autocomplete='off';input.spellcheck=false;input.placeholder='输入第 '+(i+1)+' 题答案';input.setAttribute('aria-label','第 '+(i+1)+' 题答案');
+          input.addEventListener('input',function(){state.responses[i]=input.value;updateProgress()});
+          row.appendChild(num);row.appendChild(input);wrap.appendChild(row);
+        });
+        updateProgress();window.scrollTo({top:0,behavior:'smooth'});setTimeout(function(){var first=wrap.querySelector('input');if(first)first.focus()},250);
+      }
+      function updateProgress(){var done=state.responses.filter(function(v){return v.trim()}).length;$('progress').textContent=done+' / '+state.responses.length;$('answeredNote').textContent=done===0?'尚未作答':done===state.responses.length?'已全部作答':'已答 '+done+' 题，还有 '+(state.responses.length-done)+' 题'}
+      $('submitQuiz').addEventListener('click',function(){var blank=state.responses.filter(function(v){return !v.trim()}).length;$('confirmText').textContent=blank?'还有 '+blank+' 题未作答，交卷后会按错误计分。':'所有题目都已填写，交卷后会立即批改。';$('confirmModal').hidden=false;$('cancelSubmit').focus()});
+      $('cancelSubmit').addEventListener('click',function(){$('confirmModal').hidden=true});
+      $('confirmSubmit').addEventListener('click',function(){$('confirmModal').hidden=true;gradeQuiz()});
+      $('confirmModal').addEventListener('click',function(e){if(e.target===$('confirmModal'))$('confirmModal').hidden=true});
+
+      function normalize(text){
+        var s=text.normalize('NFKC').trim().replace(/\s+/g,' ');
+        if(state.quiz.c==='ignore')s=s.toLocaleLowerCase('en');
+        if(state.quiz.p==='ignore')s=s.replace(/[\p{P}\p{S}]/gu,'').replace(/\s+/g,' ').trim();
+        return s;
+      }
+      function levenshtein(a,b){var prev=[],cur=[],i,j;for(j=0;j<=b.length;j++)prev[j]=j;for(i=1;i<=a.length;i++){cur=[i];for(j=1;j<=b.length;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur}return prev[b.length]}
+      function isCorrect(given,answer){var g=normalize(given),a=normalize(answer);if(g===a)return true;if(state.quiz.s==='lenient'&&a.length>=5&&g.length>=4)return levenshtein(g,a)<=1;return false}
+      function gradeQuiz(){
+        var items=state.quiz.a.map(function(answer,i){return{answer:answer,given:state.responses[i].trim(),ok:isCorrect(state.responses[i],answer)}});
+        var correct=items.filter(function(x){return x.ok}).length;var score=Math.round(correct/items.length*100);
+        state.lastResult={items:items,correct:correct,score:score,total:items.length};renderResult();
+      }
+      function renderResult(){
+        quizPanel.hidden=true;resultPanel.hidden=false;$('pageHeadline').textContent='批改完成';$('pageSubline').textContent='先核对姓名和成绩，再把页面展示给老师。';$('stepMark').textContent='04';
+        var r=state.lastResult;$('scoreNum').textContent=r.score;$('resultName').textContent=state.student+' · '+(state.quiz.t||'课堂听写');
+        $('resultTitle').textContent=r.score===100?'全部正确':r.score>=80?'完成得不错':r.score>=60?'继续巩固':'再练习一次';
+        $('resultSummary').textContent='答对 '+r.correct+' 题，共 '+r.total+' 题';
+        var list=$('reviewList');list.innerHTML='';r.items.forEach(function(item,i){
+          var row=document.createElement('div');row.className='review-item';
+          var dot=document.createElement('div');dot.className='status-dot '+(item.ok?'good':'bad');dot.textContent=item.ok?'✓':'×';
+          var main=document.createElement('div');main.className='review-main';
+          var given=document.createElement('div');given.className='given';given.textContent=(i+1)+'. '+(item.given||'（未作答）');main.appendChild(given);
+          if(!item.ok){var correct=document.createElement('div');correct.className='correct';correct.textContent='标准答案：'+item.answer;main.appendChild(correct)}
+          var tag=document.createElement('span');tag.className='tag';tag.textContent=item.ok?'正确':'需订正';
+          row.appendChild(dot);row.appendChild(main);row.appendChild(tag);list.appendChild(row);
+        });
+        window.scrollTo({top:0,behavior:'smooth'});
+      }
+      $('showTeacher').addEventListener('click',function(){var r=state.lastResult;$('bigScore').textContent=r.score+'分';$('bigName').textContent=state.student;$('bigSummary').textContent='答对 '+r.correct+' / '+r.total+' 题';$('fullscreenScore').hidden=false;$('closeFull').focus()});
+      $('closeFull').addEventListener('click',function(){$('fullscreenScore').hidden=true;$('showTeacher').focus()});
+      $('backToJoin').addEventListener('click',function(){setMode('student');$('joinCode').value='';$('studentName').value='';$('joinError').textContent=''});
+      document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(!$('fullscreenScore').hidden)$('fullscreenScore').hidden=true;if(!$('confirmModal').hidden)$('confirmModal').hidden=true}});
+    })();
+  </script>
+</body>
+</html>
